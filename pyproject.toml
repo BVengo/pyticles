@@ -8,11 +8,12 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 pyopengl = "^3.1.7"
-pyopengl-accelerate = "^3.1.7"
-
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7.1"
+
+[tool.poetry.scripts]
+pyticles = "pyticles.__main__:run"
 
 [build-system]
 requires = ["poetry-core"]
