@@ -8,38 +8,38 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-verticies = (
-    (1, -1, -1),
-    (1, 1, -1),
-    (-1, 1, -1),
-    (-1, -1, -1),
-    (1, -1, 1),
-    (1, 1, 1),
-    (-1, -1, 1),
-    (-1, 1, 1)
-)
-edges = (
-    (0,1),
-    (0,3),
-    (0,4),
-    (2,1),
-    (2,3),
-    (2,7),
-    (6,3),
-    (6,4),
-    (6,7),
-    (5,1),
-    (5,4),
-    (5,7)
-)
-def Cube():
-    glPointSize(50)
-    glBegin(GL_POINTS)
-    for edge in edges:
-        for vertex in edge:
-            glVertex3fv(verticies[vertex])
-    glEnd()
+class Cube():
+    verticies = (
+        (1, -1, -1),
+        (1, 1, -1),
+        (-1, 1, -1),
+        (-1, -1, -1),
+        (1, -1, 1),
+        (1, 1, 1),
+        (-1, -1, 1),
+        (-1, 1, 1)
+    )
+    edges = (
+        (0, 1),
+        (0, 3),
+        (0, 4),
+        (2, 1),
+        (2, 3),
+        (2, 7),
+        (6, 3),
+        (6, 4),
+        (6, 7),
+        (5, 1),
+        (5, 4),
+        (5, 7)
+    )
 
+    def draw(self):
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            for vertex in edge:
+                glVertex3fv(self.verticies[vertex])
+        glEnd()
 
 class KeyEvent(Enum):
     KEY_DOWN = 1  # Every tick of key down
@@ -129,6 +129,8 @@ def main():
     keys_manager = KeyManager()
     keys_manager.add_callback(K_ESCAPE, KeyEvent.KEY_RELEASED, lambda: pygame.quit())
 
+    cube = Cube()
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -139,9 +141,12 @@ def main():
 
         keys_manager.update()
 
+        if not pygame.display.get_init():
+            break
+
         glRotatef(1, 3, 1, 1)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        Cube()
+        cube.draw()
         pygame.display.flip()
         pygame.time.wait(10)
 
