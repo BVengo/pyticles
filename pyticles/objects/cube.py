@@ -1,4 +1,5 @@
 from OpenGL.GL import glBegin, glVertex3fv, GL_LINES, glEnd
+from OpenGL.raw.GL.VERSION.GL_1_0 import glVertex3f
 
 from pyticles.interfaces import GameObject
 from pyticles.types import Vector3f
@@ -31,7 +32,12 @@ class Cube(GameObject):
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
-                glVertex3fv(self.vertices[vertex])
+                x, y, z = self.vertices[vertex]
+                x += self._pos[0]
+                y += self._pos[1]
+                z += self._pos[2]
+
+                glVertex3f(x, y, z)
 
         glEnd()
 

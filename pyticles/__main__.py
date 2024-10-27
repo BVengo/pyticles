@@ -16,6 +16,14 @@ from pyticles.input import KeyManager, KeyEvent
 from pyticles.objects import OctTree, Particle
 
 
+DISPLAY_SIZE = 1000, 1000
+FOV = 45
+NEAR = 0.1
+FAR = 50.0
+
+NUM_PARTICLES = 1000
+DISPLAY_TREE = False
+
 def init_camera(fov: float, aspect: float, near: float, far: float):
     gluPerspective(fov, aspect, near, far)  # Perspective camera
     glTranslatef(0.0, 0.0, -5)  # Move back to see objects
@@ -23,17 +31,17 @@ def init_camera(fov: float, aspect: float, near: float, far: float):
 
 def run():
     pygame.init()
-    display = (1000, 1000)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    pygame.display.set_mode(DISPLAY_SIZE, DOUBLEBUF | OPENGL)
 
-    init_camera(45, display[0] / display[1], 0.1, 50.0)
+    init_camera(FOV, DISPLAY_SIZE[0] / DISPLAY_SIZE[1], NEAR, FAR)
 
     # KeyManager controls callbacks for specific key events
     keys_manager = KeyManager()
     keys_manager.add_callback(K_ESCAPE, KeyEvent.KEY_RELEASED, lambda: pygame.quit())
 
-    tree = OctTree((0, 0, 0), (1, 1, 1), 1)
-    particles = [Particle((random(), random(), random())) for _ in range(0, 1000)]
+    tree = OctTree((0, 0, 0), (1, 1, 1), 0)
+    tree.enable_draw(DISPLAY_TREE)
+    [tree.add(Particle((random(), random(), random()))) for _ in range(0, NUM_PARTICLES)]
 
     while True:
         for event in pygame.event.get():
@@ -52,8 +60,6 @@ def run():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         tree.draw()
-        for particle in particles:
-            particle.draw()
 
         pygame.display.flip()
         pygame.time.wait(10)
