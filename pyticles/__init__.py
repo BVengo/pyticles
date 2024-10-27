@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from enum import Enum
+from typing import Generic, TypeVar
 from uuid import uuid4, UUID
 
 import pygame
@@ -10,9 +11,17 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 
-class IDrawable(ABC):
+Vector3f = TypeVar('Vector3f', bound=tuple[float, float, float])
+
+
+class IDrawable(Generic[Vector3f], ABC):
+    @property
     @abstractmethod
-    def draw(self):
+    def pos(self) -> Vector3f:
+        pass
+
+    @abstractmethod
+    def draw(self) -> None:
         pass
 
 
@@ -26,27 +35,45 @@ class GameObject(IDrawable, IUpdatable, ABC):
     pass
 
 
-class VertexWorld(GameObject):
-    vertices = (
-        (1, -1, -1),
-        (1, 1, -1),
-        (-1, 1, -1),
-        (-1, -1, -1),
-        (1, -1, 1),
-        (1, 1, 1),
-        (-1, -1, 1),
-        (-1, 1, 1)
-    )
+class Cube(GameObject):
+    def __init__(self, pos: Vector3f, dim: Vector3f):
+        self._pos = pos
+        self.dim = dim
+
+        self.vertices = [(x, y, z) for x in (0, dim[0]) for y in (0, dim[1]) for z in (0, dim[2])]
+        self.edges = (
+            (0, 1), (0, 2), (0, 4), (1, 3),
+            (1, 5), (2, 3), (2, 6), (3, 7),
+            (4, 5), (4, 6), (5, 7), (6, 7)
+        )
+
+    def draw(self):
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            for vertex in edge:
+                glVertex3fv(self.vertices[vertex])
+
+        glEnd()
 
     def update(self, dt: float):
         pass
 
-    def draw(self):
-        glBegin(GL_POINTS)
-        for vertex in self.vertices:
-            glVertex3fv(vertex)
+    @property
+    def pos(self) -> Vector3f:
+        return self._pos
 
-        glEnd()
+
+class OctTree(Cube):
+    def __init__(self, pos: Vector3f, dim: Vector3f, depth: int):
+        super().__init__(pos, dim)
+        self.depth = depth
+        self.children = []
+
+    def add(self, obj):
+        pass
+
+    def remove(self, obj):
+        pass
 
 
 class KeyEvent(Enum):
@@ -125,19 +152,22 @@ class KeyManager:
         self.get_key(key).remove_callback(event, uid)
 
 
+def init_camera(fov: float, aspect: float, near: float, far: float):
+    gluPerspective(fov, aspect, near, far)  # Perspective camera
+    glTranslatef(0.0, 0.0, -5)  # Move back to see objectss
+
 def main():
     pygame.init()
-    display = (800,600)
+    display = (1000,1000)
     pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
 
-    gluPerspective(45, (display[0]/display[1]), 0.1, 50.0)
+    init_camera(45, display[0]/display[1], 0.1, 50.0)
 
-    glTranslatef(0.0,0.0, -5)
-
+    # KeyManager controls callbacks for specific key events
     keys_manager = KeyManager()
     keys_manager.add_callback(K_ESCAPE, KeyEvent.KEY_RELEASED, lambda: pygame.quit())
 
-    cube = VertexWorld()
+    tree = OctTree((0, 0, 0), (1, 1, 1), 1)
 
     while True:
         for event in pygame.event.get():
@@ -154,8 +184,10 @@ def main():
 
         glRotatef(1, 3, 1, 1)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        cube.draw()
+        tree.draw()
         pygame.display.flip()
         pygame.time.wait(10)
 
-main()
+
+if __name__ == '__main__':
+    main()
