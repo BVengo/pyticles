@@ -1,17 +1,27 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Generic, TypeVar
 from uuid import uuid4, UUID
 
 import pygame
 
-from pygame.locals import *
+from pygame.locals import DOUBLEBUF, OPENGL, K_ESCAPE
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL.GL import (
+    glBegin,
+    glEnd,
+    glVertex3fv,
+    glClear,
+    GL_COLOR_BUFFER_BIT,
+    GL_DEPTH_BUFFER_BIT,
+    GL_LINES,
+    glRotatef,
+    glTranslatef,
+)
+from OpenGL.GLU import gluPerspective
 
 
-Vector3f = TypeVar('Vector3f', bound=tuple[float, float, float])
+Vector3f = TypeVar("Vector3f", bound=tuple[float, float, float])
 
 
 class IDrawable(Generic[Vector3f], ABC):
@@ -40,11 +50,22 @@ class Cube(GameObject):
         self._pos = pos
         self.dim = dim
 
-        self.vertices = [(x, y, z) for x in (0, dim[0]) for y in (0, dim[1]) for z in (0, dim[2])]
+        self.vertices = [
+            (x, y, z) for x in (0, dim[0]) for y in (0, dim[1]) for z in (0, dim[2])
+        ]
         self.edges = (
-            (0, 1), (0, 2), (0, 4), (1, 3),
-            (1, 5), (2, 3), (2, 6), (3, 7),
-            (4, 5), (4, 6), (5, 7), (6, 7)
+            (0, 1),
+            (0, 2),
+            (0, 4),
+            (1, 3),
+            (1, 5),
+            (2, 3),
+            (2, 6),
+            (3, 7),
+            (4, 5),
+            (4, 6),
+            (5, 7),
+            (6, 7),
         )
 
     def draw(self):
@@ -154,14 +175,15 @@ class KeyManager:
 
 def init_camera(fov: float, aspect: float, near: float, far: float):
     gluPerspective(fov, aspect, near, far)  # Perspective camera
-    glTranslatef(0.0, 0.0, -5)  # Move back to see objectss
+    glTranslatef(0.0, 0.0, -5)  # Move back to see objects
+
 
 def main():
     pygame.init()
-    display = (1000,1000)
-    pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
+    display = (1000, 1000)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
 
-    init_camera(45, display[0]/display[1], 0.1, 50.0)
+    init_camera(45, display[0] / display[1], 0.1, 50.0)
 
     # KeyManager controls callbacks for specific key events
     keys_manager = KeyManager()
@@ -183,11 +205,11 @@ def main():
             break
 
         glRotatef(1, 3, 1, 1)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         tree.draw()
         pygame.display.flip()
         pygame.time.wait(10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
