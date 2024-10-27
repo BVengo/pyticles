@@ -26,7 +26,7 @@ class GameObject(IDrawable, IUpdatable, ABC):
     pass
 
 
-class Cube(GameObject):
+class VertexWorld(GameObject):
     vertices = (
         (1, -1, -1),
         (1, 1, -1),
@@ -37,29 +37,15 @@ class Cube(GameObject):
         (-1, -1, 1),
         (-1, 1, 1)
     )
-    edges = (
-        (0, 1),
-        (0, 3),
-        (0, 4),
-        (2, 1),
-        (2, 3),
-        (2, 7),
-        (6, 3),
-        (6, 4),
-        (6, 7),
-        (5, 1),
-        (5, 4),
-        (5, 7)
-    )
 
     def update(self, dt: float):
         pass
 
     def draw(self):
-        glBegin(GL_LINES)
-        for edge in self.edges:
-            for vertex in edge:
-                glVertex3fv(self.vertices[vertex])
+        glBegin(GL_POINTS)
+        for vertex in self.vertices:
+            glVertex3fv(vertex)
+
         glEnd()
 
 
@@ -151,7 +137,7 @@ def main():
     keys_manager = KeyManager()
     keys_manager.add_callback(K_ESCAPE, KeyEvent.KEY_RELEASED, lambda: pygame.quit())
 
-    cube = Cube()
+    cube = VertexWorld()
 
     while True:
         for event in pygame.event.get():
