@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from enum import Enum
 from uuid import uuid4, UUID
 
@@ -8,8 +9,25 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-class Cube():
-    verticies = (
+
+class IDrawable(ABC):
+    @abstractmethod
+    def draw(self):
+        pass
+
+
+class IUpdatable(ABC):
+    @abstractmethod
+    def update(self, dt: float):
+        pass
+
+
+class GameObject(IDrawable, IUpdatable, ABC):
+    pass
+
+
+class Cube(GameObject):
+    vertices = (
         (1, -1, -1),
         (1, 1, -1),
         (-1, 1, -1),
@@ -34,12 +52,16 @@ class Cube():
         (5, 7)
     )
 
+    def update(self, dt: float):
+        pass
+
     def draw(self):
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
-                glVertex3fv(self.verticies[vertex])
+                glVertex3fv(self.vertices[vertex])
         glEnd()
+
 
 class KeyEvent(Enum):
     KEY_DOWN = 1  # Every tick of key down
