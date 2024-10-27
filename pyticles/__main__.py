@@ -1,4 +1,5 @@
 import pygame
+from random import random
 
 from pygame.locals import DOUBLEBUF, OPENGL, K_ESCAPE
 
@@ -12,7 +13,7 @@ from OpenGL.GL import (
 from OpenGL.GLU import gluPerspective
 
 from pyticles.input import KeyManager, KeyEvent
-from pyticles.objects import OctTree
+from pyticles.objects import OctTree, Particle
 
 
 def init_camera(fov: float, aspect: float, near: float, far: float):
@@ -32,6 +33,7 @@ def run():
     keys_manager.add_callback(K_ESCAPE, KeyEvent.KEY_RELEASED, lambda: pygame.quit())
 
     tree = OctTree((0, 0, 0), (1, 1, 1), 1)
+    particles = [Particle((random(), random(), random())) for _ in range(0, 1000)]
 
     while True:
         for event in pygame.event.get():
@@ -48,7 +50,11 @@ def run():
 
         glRotatef(1, 3, 1, 1)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
         tree.draw()
+        for particle in particles:
+            particle.draw()
+
         pygame.display.flip()
         pygame.time.wait(10)
 
